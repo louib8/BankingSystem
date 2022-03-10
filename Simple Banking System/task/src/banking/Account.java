@@ -3,14 +3,14 @@ package banking;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+import static banking.Card.*;
+
 public class Account {
-    public String cardNumber;
-    public String pin;
+    public Card card;
     public long balance;
 
     public Account(String cardNumber, String pin) {
-        this.cardNumber = cardNumber;
-        this.pin = pin;
+        this.card = new Card(cardNumber, pin);
         this.balance = 0;
     }
 
@@ -21,9 +21,9 @@ public class Account {
             return -1;
         };
 
-        String query = "INSERT INTO card (number, pin, balance)" +
-                "VALUES (" + acct.cardNumber + ", " +
-                acct.pin + ", " +
+        String query = "INSERT INTO card (number, pin, balance) " +
+                "VALUES (" + acct.card.cardNumber + ", " +
+                acct.card.pin + ", " +
                 acct.balance + ");";
         rowsAffected = dbConn.SQLExecuteUpdate(query);
         return rowsAffected;
@@ -35,7 +35,7 @@ public class Account {
 
         String query = "SELECT COUNT(number) " +
                 "FROM card " +
-                "WHERE number = " + acct.cardNumber + ";";
+                "WHERE number = " + acct.card.cardNumber + ";";
 
         try (ResultSet resultSet = dbConn.SQLExecuteQuery(query)) {
             while (resultSet.next()) {
@@ -45,7 +45,7 @@ public class Account {
             e.printStackTrace();
         }
 
-        result = numRows > 0 ? false : true;
+        result = numRows > 0 ? true : false;
 
         return result;
     }
@@ -53,16 +53,23 @@ public class Account {
     public static Boolean AuthenticateAccount(Account acct, DBManager dbConn) {
         String query = "SELECT * " +
                 "FROM card " +
-                "WHERE number = " + acct.cardNumber + "AND " +
-                "pin = " + acct.pin + ";";
+                "WHERE number = " + acct.card.cardNumber + " AND " +
+                "pin = " + acct.card.pin + ";";
         try(ResultSet results = dbConn.SQLExecuteQuery(query)) {
-            if (results.next()) {
-                return true;
-            }
+            acct.balance = results.getInt("balance");
+            return true;
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return false;
     }
 
+    public static Account CreateAccount(DBManager dbConn) {
+        Account acct = new Account(GenerateCardNumber(16, "400000"), GeneratePin(4));
+        while (Account.CheckIfAccountInDB(acct, dbConn)) {
+            acct = new Account(GenerateCardNumber(16, "400000"), GeneratePin(4));
+        }
+        Account.StoreAccountInSQL(acct, dbConn);
+        return acct;
+    }
 }

@@ -8,7 +8,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 public class DBManager {
-    private String url = "jdbc:sqlite:C:/Users/saphi/OneDrive - Cromarty/Desktop/SQLite/westeros.db";
+    private String url;
     SQLiteDataSource dataSource = new SQLiteDataSource();
 
     public DBManager() {
@@ -61,10 +61,5 @@ public class DBManager {
             e.printStackTrace();
         }
         return rowsAffected;
-    }
-
-    public void CreateDatabaseUnlessExists(String databaseName) {
-        String query = "CREATE IF NOT EXISTS " + databaseName;
-        SQLExecute(query);
     }
 }
