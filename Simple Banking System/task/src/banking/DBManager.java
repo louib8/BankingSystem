@@ -34,11 +34,12 @@ public class DBManager {
         return result;
     }
 
-    public ResultSet SQLExecuteQuery(String query) {
+    /*public ResultSet SQLExecuteQuery(String query) {
         ResultSet results = null;
         try (Connection con = dataSource.getConnection()) {
             try (Statement statement = con.createStatement()) {
                 results = statement.executeQuery(query);
+                return results;
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -46,7 +47,7 @@ public class DBManager {
             e.printStackTrace();
         }
         return results;
-    }
+    }*/ //This doesn't work as the ResultSet is closed before it's returned, probably too much work to get around this.
 
     public int SQLExecuteUpdate(String query) {
         int rowsAffected = -1;

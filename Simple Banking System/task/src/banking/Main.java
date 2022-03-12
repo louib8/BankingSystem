@@ -11,7 +11,7 @@ import static banking.FileSystem.CheckForFile;
 public class Main {
     public static void main(String[] args) {
         int count = 0;
-        String sqlPath = "jdbc:sqlite:C:/Users/saphi/OneDrive - Cromarty/Desktop/SQLite/";
+        String sqlPath = "jdbc:sqlite:";
         StringBuilder dbName = new StringBuilder();
 
         while (count < args.length) {
@@ -92,8 +92,6 @@ public class Main {
 
         System.out.println("Bye!");
     }
-
-
 
     public static int LoggedIn(Account account) {
         Scanner scanner = new Scanner(System.in);

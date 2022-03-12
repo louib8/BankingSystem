@@ -1,7 +1,9 @@
 package banking;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 import static banking.Card.*;
 
@@ -19,11 +21,11 @@ public class Account {
 
         if(CheckIfAccountInDB(acct, dbConn)) {
             return -1;
-        };
+        }
 
         String query = "INSERT INTO card (number, pin, balance) " +
-                "VALUES (" + acct.card.cardNumber + ", " +
-                acct.card.pin + ", " +
+                "VALUES ( '" + acct.card.cardNumber + "', '" +
+                acct.card.pin + "', " +
                 acct.balance + ");";
         rowsAffected = dbConn.SQLExecuteUpdate(query);
         return rowsAffected;
@@ -35,17 +37,22 @@ public class Account {
 
         String query = "SELECT COUNT(number) " +
                 "FROM card " +
-                "WHERE number = " + acct.card.cardNumber + ";";
+                "WHERE number = '" + acct.card.cardNumber + "';";
 
-        try (ResultSet resultSet = dbConn.SQLExecuteQuery(query)) {
-            while (resultSet.next()) {
-                numRows = resultSet.getInt(0);
+
+        try (Connection con = dbConn.dataSource.getConnection()) {
+            try (Statement statement = con.createStatement()) {
+                try (ResultSet resultSet = statement.executeQuery(query)) {
+                    numRows = resultSet.getInt(1);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        result = numRows > 0 ? true : false;
+        result = numRows > 0;
 
         return result;
     }
@@ -53,11 +60,23 @@ public class Account {
     public static Boolean AuthenticateAccount(Account acct, DBManager dbConn) {
         String query = "SELECT * " +
                 "FROM card " +
-                "WHERE number = " + acct.card.cardNumber + " AND " +
-                "pin = " + acct.card.pin + ";";
-        try(ResultSet results = dbConn.SQLExecuteQuery(query)) {
-            acct.balance = results.getInt("balance");
-            return true;
+                "WHERE number = '" + acct.card.cardNumber + "' AND " +
+                "pin = '" + acct.card.pin + "';";
+
+        try (Connection con = dbConn.dataSource.getConnection()) {
+            try (Statement statement = con.createStatement()) {
+                try(ResultSet results = statement.executeQuery(query)) {
+                    if (results.isBeforeFirst()) {
+                        acct.balance = results.getInt("balance");
+                        return true;
+                    }
+                    return false;
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         } catch (SQLException e) {
             e.printStackTrace();
         }
