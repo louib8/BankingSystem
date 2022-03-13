@@ -1,5 +1,6 @@
 package banking;
 
+import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Scanner;
 
@@ -65,9 +66,9 @@ public class Main {
                     var inputPinNumber = scanner.nextLine();
                     System.out.println();
 
-                    Account loginAccount = new Account(inputCardNumber, inputPinNumber);
+                    Account loginAccount = new Account(inputCardNumber, inputPinNumber, dbConn);
 
-                    if (Account.AuthenticateAccount(loginAccount, dbConn)) {
+                    if (Account.AuthenticateAccount(loginAccount)) {
                         System.out.println("You have successfully logged in!");
                         System.out.println();
                         var condition = LoggedIn(loginAccount);
@@ -84,12 +85,21 @@ public class Main {
                     break;
                 case 0:
                     exit = true;
+                    try {
+                        dbConn.dataSource.getConnection().close();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
                     break;
                 default:
                     System.out.println("Unrecognised input");
             }
         }
-
+        try {
+            var isit = dbConn.dataSource.getConnection().isClosed();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         System.out.println("Bye!");
     }
 
@@ -98,18 +108,83 @@ public class Main {
         boolean exit = false;
         while (!exit) {
             System.out.println("1. Balance");
-            System.out.println("2. Log out");
+            System.out.println("2. Add income");
+            System.out.println("3. Do transfer");
+            System.out.println("4. Close account");
+            System.out.println("5. Log out");
             System.out.println("0. Exit");
             var input = scanner.nextInt();
             System.out.println();
 
             switch (input) {
                 case 1:
-                    System.out.println("Balance: " + account.balance);
+                    System.out.println("Balance: " + account.getBalance());
                     System.out.println();
                     break;
 
                 case 2:
+                    System.out.println("Enter the amount you would like to deposit: ");
+                    int deposit = scanner.nextInt();
+                    System.out.println();
+                    Boolean attemptDeposit = account.AddIncomeToAccount(deposit);
+                    if (attemptDeposit) {
+                        System.out.println("Successfully deposited: " + deposit);
+                        System.out.println("Account balance now: " + account.getBalance());
+                        System.out.println();
+                    } else {
+                        System.out.println("Deposit attempt failed.");
+                        System.out.println();
+                    }
+                    System.out.println();
+                    break;
+
+                case 3:
+                    System.out.println("Enter the account number you want to transfer to: ");
+                    scanner.nextLine();
+                    String destinationAccountNumber = scanner.nextLine();
+                    System.out.println();
+                    var validAcct = account.ValidateAccount(destinationAccountNumber, account);
+                    if (!validAcct.getFirstValue()) {
+                        System.out.println(validAcct.getSecondValue());
+                        System.out.println();
+                        break;
+                    }
+
+                    System.out.println("Please enter the amount you would like to transfer: ");
+                    var transferAmount = scanner.nextInt();
+
+                    var validTransfer = account.ValidateTransfer(transferAmount, destinationAccountNumber);
+                    if (!validTransfer.getFirstValue()) {
+                       System.out.println(validTransfer.getSecondValue());
+                        System.out.println();
+                       break;
+                    }
+
+                    if (account.TransferToAccount(destinationAccountNumber, transferAmount)) {
+                       System.out.println("Successfully transferred: " + transferAmount);
+                       System.out.println("From Account Number: " + account.card.cardNumber);
+                       System.out.println("To Account Number: " + destinationAccountNumber);
+                        System.out.println();
+                    } else {
+                        System.out.println("Transaction Failed, no money was withdrawn or deposited from either account.");
+                        System.out.println();
+                    }
+                    break;
+
+                case 4:
+                    if (account.CloseAccount()) {
+                        System.out.println("Account successfully closed");
+                        System.out.println();
+                        account.closeDBConn();
+                        return 1;
+                    } else {
+                        System.out.println("There was an issue closing the account, the account has not been closed");
+                        System.out.println();
+                        break;
+                    }
+
+                case 5:
+                    account.closeDBConn();
                     return 1;
 
                 case 0:
