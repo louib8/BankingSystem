@@ -3,12 +3,28 @@ package banking;
 import java.util.Random;
 
 public class Card {
-    public String cardNumber;
-    public String pin;
+    private String cardNumber;
+    private String pin;
+
+    private void setCardNumber(String cardNumber) {
+        this.cardNumber = cardNumber;
+    }
+
+    public String getCardNumber() {
+        return cardNumber;
+    }
+
+    private void setPin(String pin) {
+        this.pin = pin;
+    }
+
+    public String getPin() {
+        return pin;
+    }
 
     public Card(String cardNumber, String pin) {
-        this.cardNumber = cardNumber;
-        this.pin = pin;
+        setCardNumber(cardNumber);
+        setPin(pin);
     }
 
     public static String generateCardNumber(int cardNumLength, String bin) {

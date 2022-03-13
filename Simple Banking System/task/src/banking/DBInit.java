@@ -1,7 +1,7 @@
 package banking;
 
 public class DBInit {
-    public static void initDatabase(DBManager dbConn) {
+    public static void initialiseDatabase(DBManager dbConn) {
         createCardTable(dbConn);
     }
     public static void createCardTable(DBManager dbConn) {

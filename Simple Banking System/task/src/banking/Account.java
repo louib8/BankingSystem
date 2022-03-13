@@ -5,9 +5,17 @@ import java.sql.*;
 import static banking.Card.*;
 
 public class Account {
-    public Card card;
+    private Card card;
     private long balance;
     private DBManager dbConn;
+
+    public Card getCard() {
+        return card;
+    }
+
+    public void setCard(Card card) {
+        this.card = card;
+    }
 
     public long getBalance() {
         setBalance();
@@ -18,10 +26,18 @@ public class Account {
         this.balance = getAccountBalanceFromDB(this, dbConn);
     }
 
-    public Account(String cardNumber, String pin, DBManager dbConn) {
-        this.card = new Card(cardNumber, pin);
-        this.balance = 0;
+    public DBManager getDbConn() {
+        return dbConn;
+    }
+
+    public void setDbConn(DBManager dbConn) {
         this.dbConn = dbConn;
+    }
+
+    public Account(String cardNumber, String pin, DBManager dbConn) {
+        this.setCard(new Card(cardNumber, pin));
+        this.setBalance();
+        this.setDbConn(dbConn);
     }
 
 
@@ -48,8 +64,8 @@ public class Account {
 
         try (Connection con = dbConn.dataSource.getConnection()) {
             try (PreparedStatement getBalance = con.prepareStatement(query)) {
-                getBalance.setString(1, account.card.cardNumber);
-                getBalance.setString(2, account.card.pin);
+                getBalance.setString(1, account.card.getCardNumber());
+                getBalance.setString(2, account.card.getPin());
                 try (ResultSet resultSet = getBalance.executeQuery()) {
                     dbBalance = resultSet.getInt(1);
                 }
@@ -71,8 +87,8 @@ public class Account {
         }
 
         String query = "INSERT INTO card (number, pin, balance) " +
-                "VALUES ( '" + acct.card.cardNumber + "', '" +
-                acct.card.pin + "', " +
+                "VALUES ( '" + acct.card.getCardNumber() + "', '" +
+                acct.card.getPin() + "', " +
                 acct.balance + ");";
         rowsAffected = acct.dbConn.sqlExecuteUpdate(query);
         return rowsAffected;
@@ -84,7 +100,7 @@ public class Account {
 
         String query = "SELECT COUNT(number) " +
                 "FROM card " +
-                "WHERE number = '" + acct.card.cardNumber + "';";
+                "WHERE number = '" + acct.card.getCardNumber() + "';";
 
 
         try (Connection con = acct.dbConn.dataSource.getConnection()) {
@@ -107,8 +123,8 @@ public class Account {
     public static Boolean authenticateAccount(Account acct) {
         String query = "SELECT * " +
                 "FROM card " +
-                "WHERE number = '" + acct.card.cardNumber + "' AND " +
-                "pin = '" + acct.card.pin + "';";
+                "WHERE number = '" + acct.card.getCardNumber() + "' AND " +
+                "pin = '" + acct.card.getPin() + "';";
 
         try (Connection con = acct.dbConn.dataSource.getConnection()) {
             try (Statement statement = con.createStatement()) {
@@ -147,8 +163,8 @@ public class Account {
             Savepoint savepoint = con.setSavepoint();
             try (PreparedStatement updateBalance = con.prepareStatement(query)) {
                 updateBalance.setInt(1, deposit);
-                updateBalance.setString(2, this.card.cardNumber);
-                updateBalance.setString(3, this.card.pin);
+                updateBalance.setString(2, this.card.getCardNumber());
+                updateBalance.setString(3, this.card.getPin());
 
                 int result = updateBalance.executeUpdate();
 
@@ -170,7 +186,7 @@ public class Account {
             return new Pair<>(false, "Not enough money!");
         }
 
-        if (this.card.cardNumber.equalsIgnoreCase(destinationAccountNumber)) {
+        if (this.card.getCardNumber().equalsIgnoreCase(destinationAccountNumber)) {
             return new Pair<>(false, "You can't transfer money to the same account!");
         }
         return new Pair<>(true, "");
@@ -187,7 +203,7 @@ public class Account {
                 PreparedStatement deposit = con.prepareStatement(depositQuery)) {
 
                 withdraw.setInt(1, transferAmount);
-                withdraw.setString(2, this.card.cardNumber);
+                withdraw.setString(2, this.card.getCardNumber());
                 int withdrawResult = withdraw.executeUpdate();
 
                 deposit.setInt(1, transferAmount);
@@ -214,8 +230,8 @@ public class Account {
             con.setAutoCommit(false);
             Savepoint savepoint = con.setSavepoint();
             try (PreparedStatement deleteAccount = con.prepareStatement(deleteQuery)) {
-                deleteAccount.setString(1, this.card.cardNumber);
-                deleteAccount.setString(2, this.card.pin);
+                deleteAccount.setString(1, this.card.getCardNumber());
+                deleteAccount.setString(2, this.card.getPin());
 
                 int result = deleteAccount.executeUpdate();
 
