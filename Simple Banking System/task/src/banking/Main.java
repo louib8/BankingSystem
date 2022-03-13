@@ -21,15 +21,8 @@ public class Main {
         }
 
         DBManager dbConn = new DBManager(sqlPath.concat(dbName.toString()));
-
-        if (checkForFile(sqlPath + dbName.toString())) {
-            createCardTable(dbConn);
-        } else {
-            int index = dbName.indexOf(".");
-            String db = dbName.toString().substring(0, index);
-            //CreateDatabaseUnlessExists(db, dbConn);
-            createCardTable(dbConn);
-        }
+        
+        createCardTable(dbConn);
 
         Scanner scanner = new Scanner(System.in);
         boolean exit = false;
@@ -79,24 +72,13 @@ public class Main {
                         System.out.println("Wrong card number or PIN!");
                         System.out.println();
                     }
-
                     break;
                 case 0:
                     exit = true;
-                    try {
-                        dbConn.dataSource.getConnection().close();
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
                     break;
                 default:
                     System.out.println("Unrecognised input");
             }
-        }
-        try {
-            var isit = dbConn.dataSource.getConnection().isClosed();
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
         System.out.println("Bye!");
     }
@@ -154,7 +136,7 @@ public class Main {
                     var validTransfer = account.validateTransfer(transferAmount, destinationAccountNumber);
                     if (!validTransfer.getFirstValue()) {
                        System.out.println(validTransfer.getSecondValue());
-                        System.out.println();
+                       System.out.println();
                        break;
                     }
 
@@ -173,7 +155,6 @@ public class Main {
                     if (account.closeAccount()) {
                         System.out.println("Account successfully closed");
                         System.out.println();
-                        account.closeDBConn();
                         return 1;
                     } else {
                         System.out.println("There was an issue closing the account, the account has not been closed");
@@ -182,7 +163,6 @@ public class Main {
                     }
 
                 case 5:
-                    account.closeDBConn();
                     return 1;
 
                 case 0:

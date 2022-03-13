@@ -10,10 +10,6 @@ public class DBManager {
     private String url;
     SQLiteDataSource dataSource = new SQLiteDataSource();
 
-    public DBManager() {
-        dataSource.setUrl(url);
-    }
-
     public DBManager (String URL) {
         this.url = URL;
         dataSource.setUrl(url);

@@ -9,18 +9,6 @@ public class Account {
     private long balance;
     private DBManager dbConn;
 
-    public Boolean closeDBConn() {
-        try {
-            if (!dbConn.dataSource.getConnection().isClosed()) {
-                dbConn.dataSource.getConnection().close();
-            }
-            return true;
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
     public long getBalance() {
         setBalance();
         return balance;
@@ -161,8 +149,11 @@ public class Account {
                 updateBalance.setInt(1, deposit);
                 updateBalance.setString(2, this.card.cardNumber);
                 updateBalance.setString(3, this.card.pin);
+
                 int result = updateBalance.executeUpdate();
+
                 con.commit();
+
                 return result > 0;
             } catch (SQLException e) {
                 con.rollback(savepoint);
@@ -225,8 +216,11 @@ public class Account {
             try (PreparedStatement deleteAccount = con.prepareStatement(deleteQuery)) {
                 deleteAccount.setString(1, this.card.cardNumber);
                 deleteAccount.setString(2, this.card.pin);
+
                 int result = deleteAccount.executeUpdate();
+
                 con.commit();
+
                 return result > 0;
             } catch (SQLException e) {
                 con.rollback(savepoint);

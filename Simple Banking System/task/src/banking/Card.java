@@ -66,9 +66,8 @@ public class Card {
 
         if (sum % 10 == 0) {
             return "0";
-        } else {
-            int checksum = 10 - (sum % 10);
-            return String.valueOf(checksum);
         }
+        int checksum = 10 - (sum % 10);
+        return String.valueOf(checksum);
     }
 }
