@@ -26,19 +26,19 @@ public class Account {
 
 
     public Pair<Boolean, String> validateAccount(String destinationAccountNumber, Account account) {
-        if (destinationAccountNumber.length() < 3) return new Pair<Boolean, String>(false, "Invalid destination card number");
+        if (destinationAccountNumber.length() < 3) return new Pair<>(false, "Invalid destination card number");
         String cardNumWithoutCheckSum = destinationAccountNumber.substring(0, destinationAccountNumber.length() - 1);
         String originalCheckSum = destinationAccountNumber.substring(destinationAccountNumber.length() - 1, destinationAccountNumber.length());
 
         if (!generateCheckSum(cardNumWithoutCheckSum).equalsIgnoreCase(originalCheckSum)) {
-            return new Pair<Boolean, String>(false, "Probably you made a mistake in the card number. Please try again!");
+            return new Pair<>(false, "Probably you made a mistake in the card number. Please try again!");
         }
 
         if (!Account.checkIfAccountInDB(new Account(destinationAccountNumber, "0000", account.dbConn))) {
-            return new Pair<Boolean, String>(false, "Such a card does not exist.");
+            return new Pair<>(false, "Such a card does not exist.");
         }
 
-        return new Pair<Boolean, String>(true, "");
+        return new Pair<>(true, "");
     }
 
     private long getAccountBalanceFromDB(Account account, DBManager dbConn) {
@@ -167,13 +167,13 @@ public class Account {
 
     public Pair<Boolean, String> validateTransfer(int transferAmount, String destinationAccountNumber) {
         if (this.getBalance() < transferAmount) {
-            return new Pair<Boolean, String>(false, "Not enough money!");
+            return new Pair<>(false, "Not enough money!");
         }
 
         if (this.card.cardNumber.equalsIgnoreCase(destinationAccountNumber)) {
-            return new Pair<Boolean, String>(false, "You can't transfer money to the same account!");
+            return new Pair<>(false, "You can't transfer money to the same account!");
         }
-        return new Pair<Boolean, String>(true, "");
+        return new Pair<>(true, "");
     }
 
     public Boolean transferToAccount(String destinationAccountNumber, int transferAmount) {

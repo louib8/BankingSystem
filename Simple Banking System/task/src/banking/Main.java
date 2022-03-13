@@ -5,14 +5,13 @@ import java.util.Scanner;
 
 import static banking.Account.createAccount;
 import static banking.DBInit.createCardTable;
-import static banking.FileSystem.checkForFile;
 
 public class Main {
     public static void main(String[] args) {
         int count = 0;
         String sqlPath = "jdbc:sqlite:";
         StringBuilder dbName = new StringBuilder();
-
+        
         while (count < args.length) {
             if (args[count].equalsIgnoreCase("-fileName")) {
                 dbName.append(args[count + 1]);
@@ -21,8 +20,8 @@ public class Main {
         }
 
         DBManager dbConn = new DBManager(sqlPath.concat(dbName.toString()));
-        
-        createCardTable(dbConn);
+
+        DBInit.initDatabase(dbConn);
 
         Scanner scanner = new Scanner(System.in);
         boolean exit = false;

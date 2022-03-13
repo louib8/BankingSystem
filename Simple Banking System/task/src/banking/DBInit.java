@@ -1,6 +1,9 @@
 package banking;
 
 public class DBInit {
+    public static void initDatabase(DBManager dbConn) {
+        createCardTable(dbConn);
+    }
     public static void createCardTable(DBManager dbConn) {
         String query = "CREATE TABLE IF NOT EXISTS " +
                 "card (" +
