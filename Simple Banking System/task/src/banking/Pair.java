@@ -21,7 +21,7 @@ public class Pair<T, U> {
     }
 
     public Pair(T firstValue, U secondValue) {
-        this.setFirstValue(firstValue);
-        this.setSecondValue(secondValue);
+        this.firstValue = firstValue;
+        this.secondValue = secondValue;
     }
 }

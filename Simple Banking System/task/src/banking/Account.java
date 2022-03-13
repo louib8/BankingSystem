@@ -6,38 +6,31 @@ import static banking.Card.*;
 
 public class Account {
     private Card card;
-    private long balance;
     private DBManager dbConn;
 
     public Card getCard() {
         return card;
     }
 
-    public void setCard(Card card) {
+    private void setCard(Card card) {
         this.card = card;
     }
 
     public long getBalance() {
-        setBalance();
-        return balance;
-    }
-
-    private void setBalance() {
-        this.balance = getAccountBalanceFromDB(this, dbConn);
+        return getAccountBalanceFromDB(this);
     }
 
     public DBManager getDbConn() {
         return dbConn;
     }
 
-    public void setDbConn(DBManager dbConn) {
+    private void setDbConn(DBManager dbConn) {
         this.dbConn = dbConn;
     }
 
     public Account(String cardNumber, String pin, DBManager dbConn) {
-        this.setCard(new Card(cardNumber, pin));
-        this.setBalance();
-        this.setDbConn(dbConn);
+        this.card = new Card(cardNumber, pin);
+        this.dbConn = dbConn;
     }
 
 
@@ -57,12 +50,12 @@ public class Account {
         return new Pair<>(true, "");
     }
 
-    private long getAccountBalanceFromDB(Account account, DBManager dbConn) {
+    private long getAccountBalanceFromDB(Account account) {
         long dbBalance = 0;
 
         String query = "SELECT balance FROM card WHERE number = ? AND pin = ?";
 
-        try (Connection con = dbConn.dataSource.getConnection()) {
+        try (Connection con = account.getDbConn().dataSource.getConnection()) {
             try (PreparedStatement getBalance = con.prepareStatement(query)) {
                 getBalance.setString(1, account.card.getCardNumber());
                 getBalance.setString(2, account.card.getPin());
@@ -89,7 +82,7 @@ public class Account {
         String query = "INSERT INTO card (number, pin, balance) " +
                 "VALUES ( '" + acct.card.getCardNumber() + "', '" +
                 acct.card.getPin() + "', " +
-                acct.balance + ");";
+                acct.getBalance() + ");";
         rowsAffected = acct.dbConn.sqlExecuteUpdate(query);
         return rowsAffected;
     }
@@ -130,7 +123,6 @@ public class Account {
             try (Statement statement = con.createStatement()) {
                 try(ResultSet results = statement.executeQuery(query)) {
                     if (results.isBeforeFirst()) {
-                        acct.balance = acct.getBalance();
                         return true;
                     }
                     return false;

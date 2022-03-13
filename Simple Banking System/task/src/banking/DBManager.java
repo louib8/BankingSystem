@@ -20,8 +20,8 @@ public class DBManager {
     SQLiteDataSource dataSource = new SQLiteDataSource();
 
     public DBManager (String URL) {
-        this.setUrl(URL);
-        dataSource.setUrl(this.getUrl());
+        this.url = URL;
+        dataSource.setUrl(this.url);
     }
 
     public static String getSQLPath(String[] args) {

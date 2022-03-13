@@ -23,8 +23,8 @@ public class Card {
     }
 
     public Card(String cardNumber, String pin) {
-        setCardNumber(cardNumber);
-        setPin(pin);
+        this.cardNumber = cardNumber;
+        this.pin = pin;
     }
 
     public static String generateCardNumber(int cardNumLength, String bin) {
