@@ -3,7 +3,6 @@ package banking;
 import org.sqlite.SQLiteDataSource;
 
 import java.sql.Connection;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -20,7 +19,7 @@ public class DBManager {
         dataSource.setUrl(url);
     }
 
-    public Boolean SQLExecute(String query) {
+    public Boolean sqlExecute(String query) {
         Boolean result = false;
         try (Connection con = dataSource.getConnection()) {
             try (Statement statement = con.createStatement()) {
@@ -34,7 +33,7 @@ public class DBManager {
         return result;
     }
 
-    /*public ResultSet SQLExecuteQuery(String query) {
+    /*public ResultSet sqlExecuteQuery(String query) {
         ResultSet results = null;
         try (Connection con = dataSource.getConnection()) {
             try (Statement statement = con.createStatement()) {
@@ -49,7 +48,7 @@ public class DBManager {
         return results;
     }*/ //This doesn't work as the ResultSet is closed before it's returned, probably too much work to get around this.
 
-    public int SQLExecuteUpdate(String query) {
+    public int sqlExecuteUpdate(String query) {
         int rowsAffected = -1;
         try (Connection con = dataSource.getConnection()) {
             try (Statement statement = con.createStatement()) {

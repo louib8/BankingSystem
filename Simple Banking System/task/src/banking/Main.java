@@ -1,13 +1,11 @@
 package banking;
 
 import java.sql.SQLException;
-import java.util.HashMap;
 import java.util.Scanner;
 
-import static banking.Account.CreateAccount;
-import static banking.DBInit.CreateCardTable;
-import static banking.DBInit.CreateDatabaseUnlessExists;
-import static banking.FileSystem.CheckForFile;
+import static banking.Account.createAccount;
+import static banking.DBInit.createCardTable;
+import static banking.FileSystem.checkForFile;
 
 public class Main {
     public static void main(String[] args) {
@@ -24,13 +22,13 @@ public class Main {
 
         DBManager dbConn = new DBManager(sqlPath.concat(dbName.toString()));
 
-        if (CheckForFile(sqlPath + dbName.toString())) {
-            CreateCardTable(dbConn);
+        if (checkForFile(sqlPath + dbName.toString())) {
+            createCardTable(dbConn);
         } else {
             int index = dbName.indexOf(".");
             String db = dbName.toString().substring(0, index);
             //CreateDatabaseUnlessExists(db, dbConn);
-            CreateCardTable(dbConn);
+            createCardTable(dbConn);
         }
 
         Scanner scanner = new Scanner(System.in);
@@ -48,7 +46,7 @@ public class Main {
             }
             switch (input) {
                 case 1:
-                    var account = CreateAccount(dbConn);
+                    var account = createAccount(dbConn);
                     System.out.println();
                     System.out.println("Your card has been created");
                     System.out.println("Your card number:");
@@ -68,10 +66,10 @@ public class Main {
 
                     Account loginAccount = new Account(inputCardNumber, inputPinNumber, dbConn);
 
-                    if (Account.AuthenticateAccount(loginAccount)) {
+                    if (Account.authenticateAccount(loginAccount)) {
                         System.out.println("You have successfully logged in!");
                         System.out.println();
-                        var condition = LoggedIn(loginAccount);
+                        var condition = loggedIn(loginAccount);
                         if (condition == 1) {
                             continue;
                         } else {
@@ -103,7 +101,7 @@ public class Main {
         System.out.println("Bye!");
     }
 
-    public static int LoggedIn(Account account) {
+    public static int loggedIn(Account account) {
         Scanner scanner = new Scanner(System.in);
         boolean exit = false;
         while (!exit) {
@@ -126,7 +124,7 @@ public class Main {
                     System.out.println("Enter the amount you would like to deposit: ");
                     int deposit = scanner.nextInt();
                     System.out.println();
-                    Boolean attemptDeposit = account.AddIncomeToAccount(deposit);
+                    Boolean attemptDeposit = account.addIncomeToAccount(deposit);
                     if (attemptDeposit) {
                         System.out.println("Successfully deposited: " + deposit);
                         System.out.println("Account balance now: " + account.getBalance());
@@ -143,7 +141,7 @@ public class Main {
                     scanner.nextLine();
                     String destinationAccountNumber = scanner.nextLine();
                     System.out.println();
-                    var validAcct = account.ValidateAccount(destinationAccountNumber, account);
+                    var validAcct = account.validateAccount(destinationAccountNumber, account);
                     if (!validAcct.getFirstValue()) {
                         System.out.println(validAcct.getSecondValue());
                         System.out.println();
@@ -153,14 +151,14 @@ public class Main {
                     System.out.println("Please enter the amount you would like to transfer: ");
                     var transferAmount = scanner.nextInt();
 
-                    var validTransfer = account.ValidateTransfer(transferAmount, destinationAccountNumber);
+                    var validTransfer = account.validateTransfer(transferAmount, destinationAccountNumber);
                     if (!validTransfer.getFirstValue()) {
                        System.out.println(validTransfer.getSecondValue());
                         System.out.println();
                        break;
                     }
 
-                    if (account.TransferToAccount(destinationAccountNumber, transferAmount)) {
+                    if (account.transferToAccount(destinationAccountNumber, transferAmount)) {
                        System.out.println("Successfully transferred: " + transferAmount);
                        System.out.println("From Account Number: " + account.card.cardNumber);
                        System.out.println("To Account Number: " + destinationAccountNumber);
@@ -172,7 +170,7 @@ public class Main {
                     break;
 
                 case 4:
-                    if (account.CloseAccount()) {
+                    if (account.closeAccount()) {
                         System.out.println("Account successfully closed");
                         System.out.println();
                         account.closeDBConn();

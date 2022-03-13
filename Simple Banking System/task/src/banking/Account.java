@@ -27,7 +27,7 @@ public class Account {
     }
 
     private void setBalance() {
-        this.balance = GetAccountBalanceFromDB(this, dbConn);
+        this.balance = getAccountBalanceFromDB(this, dbConn);
     }
 
     public Account(String cardNumber, String pin, DBManager dbConn) {
@@ -37,23 +37,23 @@ public class Account {
     }
 
 
-    public Pair<Boolean, String> ValidateAccount(String destinationAccountNumber, Account account) {
+    public Pair<Boolean, String> validateAccount(String destinationAccountNumber, Account account) {
         if (destinationAccountNumber.length() < 3) return new Pair<Boolean, String>(false, "Invalid destination card number");
         String cardNumWithoutCheckSum = destinationAccountNumber.substring(0, destinationAccountNumber.length() - 1);
         String originalCheckSum = destinationAccountNumber.substring(destinationAccountNumber.length() - 1, destinationAccountNumber.length());
 
-        if (!GenerateCheckSum(cardNumWithoutCheckSum).equalsIgnoreCase(originalCheckSum)) {
+        if (!generateCheckSum(cardNumWithoutCheckSum).equalsIgnoreCase(originalCheckSum)) {
             return new Pair<Boolean, String>(false, "Probably you made a mistake in the card number. Please try again!");
         }
 
-        if (!Account.CheckIfAccountInDB(new Account(destinationAccountNumber, "0000", account.dbConn))) {
+        if (!Account.checkIfAccountInDB(new Account(destinationAccountNumber, "0000", account.dbConn))) {
             return new Pair<Boolean, String>(false, "Such a card does not exist.");
         }
 
         return new Pair<Boolean, String>(true, "");
     }
 
-    private long GetAccountBalanceFromDB(Account account, DBManager dbConn) {
+    private long getAccountBalanceFromDB(Account account, DBManager dbConn) {
         long dbBalance = 0;
 
         String query = "SELECT balance FROM card WHERE number = ? AND pin = ?";
@@ -75,10 +75,10 @@ public class Account {
         return dbBalance;
     }
 
-    public static int StoreAccountInSQL (Account acct) {
+    public static int storeAccountInSQL(Account acct) {
         int rowsAffected = 0;
 
-        if(CheckIfAccountInDB(acct)) {
+        if(checkIfAccountInDB(acct)) {
             return -1;
         }
 
@@ -86,11 +86,11 @@ public class Account {
                 "VALUES ( '" + acct.card.cardNumber + "', '" +
                 acct.card.pin + "', " +
                 acct.balance + ");";
-        rowsAffected = acct.dbConn.SQLExecuteUpdate(query);
+        rowsAffected = acct.dbConn.sqlExecuteUpdate(query);
         return rowsAffected;
     }
 
-    public static Boolean CheckIfAccountInDB(Account acct) {
+    public static Boolean checkIfAccountInDB(Account acct) {
         Boolean result = false;
         int numRows = 0;
 
@@ -116,7 +116,7 @@ public class Account {
         return result;
     }
 
-    public static Boolean AuthenticateAccount(Account acct) {
+    public static Boolean authenticateAccount(Account acct) {
         String query = "SELECT * " +
                 "FROM card " +
                 "WHERE number = '" + acct.card.cardNumber + "' AND " +
@@ -142,16 +142,16 @@ public class Account {
         return false;
     }
 
-    public static Account CreateAccount(DBManager dbConn) {
-        Account acct = new Account(GenerateCardNumber(16, "400000"), GeneratePin(4), dbConn);
-        while (Account.CheckIfAccountInDB(acct)) {
-            acct = new Account(GenerateCardNumber(16, "400000"), GeneratePin(4), dbConn);
+    public static Account createAccount(DBManager dbConn) {
+        Account acct = new Account(generateCardNumber(16, "400000"), generatePin(4), dbConn);
+        while (Account.checkIfAccountInDB(acct)) {
+            acct = new Account(generateCardNumber(16, "400000"), generatePin(4), dbConn);
         }
-        Account.StoreAccountInSQL(acct);
+        Account.storeAccountInSQL(acct);
         return acct;
     }
 
-    public Boolean AddIncomeToAccount(int deposit) {
+    public Boolean addIncomeToAccount(int deposit) {
         String query = "UPDATE card SET balance = balance + ? WHERE number = ? AND pin = ?";
 
         try (Connection con = this.dbConn.dataSource.getConnection()) {
@@ -174,7 +174,7 @@ public class Account {
         return false;
     }
 
-    public Pair<Boolean, String> ValidateTransfer(int transferAmount, String destinationAccountNumber) {
+    public Pair<Boolean, String> validateTransfer(int transferAmount, String destinationAccountNumber) {
         if (this.getBalance() < transferAmount) {
             return new Pair<Boolean, String>(false, "Not enough money!");
         }
@@ -185,7 +185,7 @@ public class Account {
         return new Pair<Boolean, String>(true, "");
     }
 
-    public Boolean TransferToAccount(String destinationAccountNumber, int transferAmount) {
+    public Boolean transferToAccount(String destinationAccountNumber, int transferAmount) {
         String withdrawQuery = "UPDATE card SET balance = balance - ? WHERE number = ?";
         String depositQuery = "UPDATE card SET balance = balance + ? WHERE number = ?";
 
@@ -216,7 +216,7 @@ public class Account {
         return false;
     }
 
-    public boolean CloseAccount() {
+    public boolean closeAccount() {
         String deleteQuery = "DELETE FROM card WHERE number = ? AND pin = ?";
 
         try (Connection con = this.dbConn.dataSource.getConnection()) {

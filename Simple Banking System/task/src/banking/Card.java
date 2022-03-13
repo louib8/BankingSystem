@@ -11,7 +11,7 @@ public class Card {
         this.pin = pin;
     }
 
-    public static String GenerateCardNumber(int cardNumLength, String bin) {
+    public static String generateCardNumber(int cardNumLength, String bin) {
         int binLength = bin.length();
         Random random = new Random();
         StringBuilder cardNumber = new StringBuilder();
@@ -20,12 +20,12 @@ public class Card {
             cardNumber.append(random.nextInt(10));
         }
 
-        cardNumber.append(GenerateCheckSum(cardNumber.toString()));
+        cardNumber.append(generateCheckSum(cardNumber.toString()));
 
         return cardNumber.toString();
     }
 
-    public static String GeneratePin(int pinLength) {
+    public static String generatePin(int pinLength) {
         Random random = new Random();
         StringBuilder pin = new StringBuilder();
         for (int i = 0; i < pinLength; i++) {
@@ -34,7 +34,7 @@ public class Card {
         return pin.toString();
     }
 
-    public static String GenerateCheckSum(String cardNumber) {
+    public static String generateCheckSum(String cardNumber) {
         //There are three steps to generate a checksum using Luhn Algorithm
 
         int[] cardArray = new int[cardNumber.length()];
